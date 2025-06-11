@@ -1,1 +1,576 @@
-{"openapi":"3.1.0","info":{"title":"FastAPI","version":"0.1.0"},"paths":{"/create_task":{"post":{"summary":"Create Task","operationId":"create_task_create_task_post","parameters":[{"name":"x-api-key","in":"header","required":true,"schema":{"type":"string","title":"X-Api-Key"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/CreateTaskRequest"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/CreateTaskResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/get_results/{task_id}":{"get":{"summary":"Get Results","operationId":"get_results_get_results__task_id__get","parameters":[{"name":"task_id","in":"path","required":true,"schema":{"type":"string","title":"Task Id"}},{"name":"api-key","in":"header","required":true,"schema":{"type":"string","title":"Api-Key"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/GetResultsResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/generate_api_key":{"post":{"summary":"Generate Api Key","operationId":"generate_api_key_generate_api_key_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/GenerateApiKeyRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}}},"components":{"schemas":{"CreateTaskRequest":{"properties":{"task":{"type":"string","title":"Task"},"target_model":{"type":"string","title":"Target Model"},"prompt":{"type":"string","title":"Prompt"},"agent_type":{"type":"string","title":"Agent Type"},"user_persona":{"type":"string","title":"User Persona","default":""},"test_criteria":{"type":"string","title":"Test Criteria","default":""},"transcript":{"type":"string","title":"Transcript","default":""},"provided_variables":{"additionalProperties":{"type":"string"},"type":"object","title":"Provided Variables"},"tool_schema":{"items":{"additionalProperties":true,"type":"object"},"type":"array","title":"Tool Schema"}},"type":"object","required":["task","target_model","prompt","agent_type"],"title":"CreateTaskRequest"},"CreateTaskResponse":{"properties":{"task_id":{"type":"string","title":"Task Id","description":"The ID of the task"}},"type":"object","required":["task_id"],"title":"CreateTaskResponse"},"GenerateApiKeyRequest":{"properties":{"user_id":{"type":"string","title":"User Id"}},"type":"object","required":["user_id"],"title":"GenerateApiKeyRequest"},"GetResultsResponse":{"properties":{"status":{"type":"string","title":"Status","description":"The status of the task"},"result":{"$ref":"#/components/schemas/TaskResult","description":"The result of the task"},"error":{"type":"string","title":"Error","description":"The error of the task"}},"type":"object","required":["status","result","error"],"title":"GetResultsResponse"},"HTTPValidationError":{"properties":{"detail":{"items":{"$ref":"#/components/schemas/ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"},"Iteration":{"properties":{"iteration_number":{"type":"integer","title":"Iteration Number","default":0},"interpreted_task":{"type":"string","title":"Interpreted Task","default":""},"prompt_suggestions":{"items":{"$ref":"#/components/schemas/PromptChange"},"type":"array","title":"Prompt Suggestions"},"solution_approach":{"type":"string","title":"Solution Approach","default":""},"prompt_change_summary":{"type":"string","title":"Prompt Change Summary","default":""},"test":{"$ref":"#/components/schemas/Test"},"test_result":{"$ref":"#/components/schemas/TestResult"},"prompt_content":{"type":"string","title":"Prompt Content","default":""},"iteration_summary":{"type":"string","title":"Iteration Summary","default":""}},"type":"object","title":"Iteration"},"LineRange":{"properties":{"start":{"type":"integer","title":"Start"},"end":{"type":"integer","title":"End"}},"type":"object","required":["start","end"],"title":"LineRange"},"PromptChange":{"properties":{"instruction":{"type":"string","title":"Instruction"},"line_range":{"$ref":"#/components/schemas/LineRange"}},"type":"object","required":["instruction","line_range"],"title":"PromptChange"},"Task":{"properties":{"task":{"type":"string","title":"Task","default":""},"og_prompt":{"type":"string","title":"Og Prompt","default":""},"agent_type":{"type":"string","title":"Agent Type","default":"outbound"},"target_model":{"type":"string","title":"Target Model","default":""},"user_persona":{"type":"string","title":"User Persona","default":""},"test_criteria":{"type":"string","title":"Test Criteria","default":""},"provided_variables":{"additionalProperties":{"type":"string"},"type":"object","title":"Provided Variables","default":{}},"tool_schema":{"items":{"additionalProperties":true,"type":"object"},"type":"array","title":"Tool Schema","default":[]},"transcript":{"type":"string","title":"Transcript","default":""}},"type":"object","title":"Task"},"TaskResult":{"properties":{"task":{"$ref":"#/components/schemas/Task"},"passed":{"type":"boolean","title":"Passed","default":false},"final_prompt":{"type":"string","title":"Final Prompt","default":""},"task_summary":{"type":"string","title":"Task Summary","default":""},"iterations":{"items":{"$ref":"#/components/schemas/Iteration"},"type":"array","title":"Iterations"}},"type":"object","title":"TaskResult"},"Test":{"properties":{"scenario":{"type":"string","title":"Scenario","default":""},"criteria":{"type":"string","title":"Criteria","default":""},"variables":{"additionalProperties":{"type":"string"},"type":"object","title":"Variables","default":{}},"transcript":{"type":"string","title":"Transcript","default":""}},"type":"object","title":"Test"},"TestResult":{"properties":{"passed":{"type":"boolean","title":"Passed"},"reason":{"type":"string","title":"Reason"},"conversation":{"items":{"additionalProperties":true,"type":"object"},"type":"array","title":"Conversation"}},"type":"object","required":["passed","reason","conversation"],"title":"TestResult"},"ValidationError":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"}}}}
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Doppler API",
+    "version": "0.1.0",
+    "description": "API-first prompt engineering platform that automates, evaluates, and optimizes prompts for LLM agents"
+  },
+  "paths": {
+    "/create_task": {
+      "post": {
+        "summary": "Create Task",
+        "description": "Create a new task to improve agent response",
+        "operationId": "create_task_create_task_post",
+        "parameters": [
+          {
+            "name": "api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "API Key",
+              "description": "Your Doppler API key for authentication"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_results/{task_id}": {
+      "get": {
+        "summary": "Get Results",
+        "description": "Poll for task results using the task ID.",
+        "operationId": "get_results_get_results__task_id__get",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task ID",
+              "description": "The unique identifier of the task returned from /create_task"
+            }
+          },
+          {
+            "name": "api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "API Key",
+              "description": "Your Doppler API key for authentication"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task results retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetResultsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/generate_api_key": {
+      "post": {
+        "summary": "Generate API Key",
+        "description": "Generate a new API key for a user",
+        "operationId": "generate_api_key_generate_api_key_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateApiKeyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "API key generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateTaskRequest": {
+        "properties": {
+          "task": {
+            "type": "string",
+            "title": "Task",
+            "description": "The description of what you want Doppler to do. Example: 'The agent needs to make search_db tool call when...'"          },
+          "target_model": {
+            "type": "string",
+            "title": "Target Model",
+            "description": "The model to use. Use the model name as per OpenAI/Anthropic docs (e.g., 'gpt-4.1' or 'claude-3-sonnet')"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "The prompt you want Doppler to evaluate/improve. Variables can be enclosed in curly braces {variable_name}"          },
+          "agent_type": {
+            "type": "string",
+            "title": "Agent Type",
+            "description": "Either 'outbound' or 'inbound' (no other values accepted)",
+            "enum": ["outbound", "inbound"]
+          },
+          "user_persona": {
+            "type": "string",
+            "title": "User Persona",
+            "description": "Describe the type of user Doppler should simulate during testing",
+            "default": "",
+            "example": "A frustrated customer looking for quick answers"
+          },
+          "test_criteria": {
+            "type": "string",
+            "title": "Test Criteria",
+            "description": "Criteria for what counts as successful agent behaviour. Specify what success looks like for your prompt.",
+            "default": "",
+            "example": "The agent should greet the user and never ask for sensitive info"
+          },
+          "transcript": {
+            "type": "string",
+            "title": "Transcript",
+            "description": "Sample conversation as a string. This helps Doppler simulate tests that closely mirror a scenario you care about.",
+            "default": ""          },
+          "provided_variables": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Provided Variables",
+            "description": "Dictionary of variable names and values used in your prompt. Variables are automatically detected if enclosed in curly braces {name}. Missing values are auto-generated by Doppler.",
+            "example": {
+              "name": "Sam",
+              "account_id": "A1234"
+            }
+          },
+          "tool_schema": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Tool Schema",
+            "description": "List of tool definitions available to the agent. Follows the OpenAI format, excluding the additional parameters field. Each tool should have name, description, and parameters.",
+            "example": [
+              {
+                "name": "searchKnowledgeBase",
+                "description": "Searches the company knowledge base for relevant answers",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "query": {
+                      "type": "string",
+                      "description": "The query to search for"
+                    }
+                  },
+                  "required": ["query"]
+                }
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": ["task", "target_model", "prompt", "agent_type"],
+        "title": "CreateTaskRequest"
+      },
+      "CreateTaskResponse": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task ID",
+            "description": "The unique identifier of the created task. Use this to poll for results."
+          }
+        },
+        "type": "object",
+        "required": ["task_id"],
+        "title": "CreateTaskResponse"
+      },
+      "GenerateApiKeyRequest": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User ID",
+            "description": "Unique identifier for the user requesting an API key"
+          }
+        },
+        "type": "object",
+        "required": ["user_id"],
+        "title": "GenerateApiKeyRequest"
+      },
+      "GetResultsResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Current task status",
+            "enum": ["completed", "running", "pending", "failed"]
+          },
+          "result": {
+            "$ref": "#/components/schemas/TaskResult",
+            "description": "The complete results object containing task details, iterations, and outcomes"
+          },
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "description": "Error message if the task failed, null otherwise"
+          }
+        },
+        "type": "object",
+        "required": ["status", "result", "error"],
+        "title": "GetResultsResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Iteration": {
+        "properties": {
+          "iteration_number": {
+            "type": "integer",
+            "title": "Iteration Number",
+            "description": "The sequence number of this iteration",
+            "default": 0
+          },
+          "interpreted_task": {
+            "type": "string",
+            "title": "Interpreted Task",
+            "description": "How the system understood your optimization goal",
+            "default": ""
+          },
+          "prompt_suggestions": {
+            "items": {
+              "$ref": "#/components/schemas/PromptChange"
+            },
+            "type": "array",
+            "title": "Prompt Suggestions",
+            "description": "Array of specific changes made to improve the prompt"
+          },
+          "solution_approach": {
+            "type": "string",
+            "title": "Solution Approach",
+            "description": "The strategy used for this iteration",
+            "default": ""
+          },
+          "prompt_change_summary": {
+            "type": "string",
+            "title": "Prompt Change Summary",
+            "description": "Summary of changes made in this iteration",
+            "default": ""
+          },
+          "test": {
+            "$ref": "#/components/schemas/Test",
+            "description": "The test scenario used for this iteration"
+          },
+          "test_result": {
+            "$ref": "#/components/schemas/TestResult",
+            "description": "Results from testing the prompt for this iteration"
+          },
+          "prompt_content": {
+            "type": "string",
+            "title": "Prompt Content",
+            "description": "The prompt version for this specific iteration",
+            "default": ""
+          },
+          "iteration_summary": {
+            "type": "string",
+            "title": "Iteration Summary",
+            "description": "What was learned or changed in this iteration",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "Iteration"
+      },
+      "LineRange": {
+        "properties": {
+          "start": {
+            "type": "integer",
+            "title": "Start",
+            "description": "Starting line number for the change"
+          },
+          "end": {
+            "type": "integer",
+            "title": "End",
+            "description": "Ending line number for the change"
+          }
+        },
+        "type": "object",
+        "required": ["start", "end"],
+        "title": "LineRange"
+      },
+      "PromptChange": {
+        "properties": {
+          "instruction": {
+            "type": "string",
+            "title": "Instruction",
+            "description": "Description of the change to be made"
+          },
+          "line_range": {
+            "$ref": "#/components/schemas/LineRange",
+            "description": "The line range where this change should be applied"
+          }
+        },
+        "type": "object",
+        "required": ["instruction", "line_range"],
+        "title": "PromptChange"
+      },
+      "Task": {
+        "properties": {
+          "task": {
+            "type": "string",
+            "title": "Task",
+            "description": "The original task description",
+            "default": ""
+          },
+          "og_prompt": {
+            "type": "string",
+            "title": "Original Prompt",
+            "description": "The original prompt that was submitted",
+            "default": ""
+          },
+          "agent_type": {
+            "type": "string",
+            "title": "Agent Type",
+            "description": "The type of agent (outbound or inbound)",
+            "default": "outbound"
+          },
+          "target_model": {
+            "type": "string",
+            "title": "Target Model",
+            "description": "The LLM model used for this task",
+            "default": ""
+          },
+          "user_persona": {
+            "type": "string",
+            "title": "User Persona",
+            "description": "The customer persona simulated during testing",
+            "default": ""
+          },
+          "test_criteria": {
+            "type": "string",
+            "title": "Test Criteria",
+            "description": "The criteria used to judge success",
+            "default": ""
+          },
+          "provided_variables": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Provided Variables",
+            "description": "Variables provided for the prompt",
+            "default": {}
+          },
+          "tool_schema": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Tool Schema",
+            "description": "Tools available to the agent",
+            "default": []
+          },
+          "transcript": {
+            "type": "string",
+            "title": "Transcript",
+            "description": "Sample conversation provided",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "Task"
+      },
+      "TaskResult": {
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/Task",
+            "description": "Your original task configuration that was submitted"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed",
+            "description": "Boolean indicating if the optimization succeeded",
+            "default": false
+          },
+          "final_prompt": {
+            "type": "string",
+            "title": "Final Prompt",
+            "description": "The final optimized prompt string",
+            "default": ""
+          },
+          "task_summary": {
+            "type": "string",
+            "title": "Task Summary",
+            "description": "Summary of all iterations and what was accomplished",
+            "default": ""
+          },
+          "iterations": {
+            "items": {
+              "$ref": "#/components/schemas/Iteration"
+            },
+            "type": "array",
+            "title": "Iterations",
+            "description": "Array of each testing and prompting iteration performed"
+          }
+        },
+        "type": "object",
+        "title": "TaskResult"
+      },
+      "Test": {
+        "properties": {
+          "scenario": {
+            "type": "string",
+            "title": "Scenario",
+            "description": "What customer role the AI pretended to interact with",
+            "default": ""
+          },
+          "criteria": {
+            "type": "string",
+            "title": "Criteria",
+            "description": "The criteria used to judge if the AI agent passed or failed",
+            "default": ""
+          },
+          "variables": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Variables",
+            "description": "Dictionary of variable values used/replaced in the prompt (auto-generated if not provided)",
+            "default": {}
+          },
+          "transcript": {
+            "type": "string",
+            "title": "Transcript",
+            "description": "String of the conversation between AI agent and pretend customer",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "Test"
+      },
+      "TestResult": {
+        "properties": {
+          "passed": {
+            "type": "boolean",
+            "title": "Passed",
+            "description": "Whether this iteration's test passed"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "description": "Explanation of why the test passed or failed"
+          },
+          "conversation": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Conversation",
+            "description": "Array of the actual conversation/interaction that was tested"
+          }
+        },
+        "type": "object",
+        "required": ["passed", "reason", "conversation"],
+        "title": "TestResult"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

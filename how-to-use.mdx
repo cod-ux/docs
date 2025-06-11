@@ -1,0 +1,249 @@
+---
+title: "How to Use"
+description: "Complete guide to using the Doppler API for prompt engineering"
+---
+
+<Info>
+**Welcome to Doppler** - Your API-first prompt engineering platform that automates, evaluates, and optimizes prompts for LLM agents.
+</Info>
+
+## 🚀 Making a Request
+
+<Steps>
+  <Step title="Fill Required Fields">
+    Every `/create_task` request must include these four essential parameters:
+
+    <CardGroup cols={2}>
+      <Card title="task" icon="bullseye">
+        **string** - The description of what you want Doppler to do  
+        *Example: "The agent needs to make `search_db` tool call when..."*
+      </Card>
+      <Card title="target_model" icon="tag">
+        **string** - The model to use per OpenAI/Anthropic docs  
+        *Example: "gpt-4.1" or "claude-3-sonnet"*
+      </Card>
+      <Card title="prompt" icon="message">
+        **string** - The prompt you want Doppler to evaluate/improve  
+        *Your base prompt text*
+      </Card>
+      <Card title="agent_type" icon="users">
+        **string** - Either "outbound" or "inbound"  
+        *No other values accepted*
+      </Card>
+    </CardGroup>
+  </Step>
+
+  <Step title="Choose Additional Parameters">
+    <Tip>
+    **Pro Tip**: These optional parameters help provide additional context for accuracte simulations and prompt improvements.
+    </Tip>
+
+    You can further customize your task using any of the following optional parameters:
+
+    <AccordionGroup>
+
+    <Accordion title="Tool Schema">
+    Define any tools your agent can access. This helps Doppler simulate tool calls and test how your prompt handles them. Follows the OpenAI format, excluding the additional parameters field in parameters.
+
+    **Structure**: A list of objects, each with `name`, `description`, and `parameters`
+
+    ```json
+    "tool_schema": [
+      {
+        "name": "searchKnowledgeBase",
+        "description": "Searches the company knowledge base for relevant answers.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "The query to search for"
+            }
+          },
+          "required": ["query"]
+        }
+      }
+    ]
+    ```
+
+    Doppler will simulate the agent making this tool call during evaluation.
+    </Accordion>
+
+    <Accordion title="Transcript">
+    Provide a sample conversation as a string. This helps Doppler simulate tests that closely mirror a scenario you care about.
+
+    ```json
+    "transcript": "User: I can't log in.\nAgent: Can you try resetting your password?\nUser: I already did."
+    ```
+    </Accordion>
+
+    <Accordion title="Test Criteria">
+    Specify what success looks like for your prompt. This is a string with criteria or requirements the agent should satisfy.
+
+    ```json
+    "test_criteria": "The agent should greet the user and never ask for sensitive info."
+    ```
+    </Accordion>
+
+    <Accordion title="User Persona">
+    Describe the type of user Doppler should simulate during testing.
+
+    ```json
+    "user_persona": "A frustrated customer looking for quick answers."
+    ```
+
+    You can use `user_persona`, `test_criteria`, or both—whichever fits your scenario.
+    </Accordion>
+
+    <Accordion title="Provided Variables">
+    A dictionary mapping variable names (enclosed in parentheses in your prompt) to their values. If any variables are missing, Doppler will auto-generate values for testing.
+
+    ```json
+    "provided_variables": {
+      "name": "Sam",
+      "account_id": "A1234"
+    }
+    ```
+
+    Variables are automatically detected if enclosed in parentheses, e.g., `{name}`.
+    </Accordion>
+
+    </AccordionGroup>
+  </Step>
+
+  <Step title="Create Your Task">
+    Here's how to structure your request with both required and optional parameters:
+
+    <CodeGroup>
+
+    ```json Minimal Request
+    {
+      "task": "The agent needs to call the search db tool call...",
+      "target_model": "claude-4-sonnet-latest", 
+      "prompt": "You are a sales agent...",
+      "agent_type": "outbound"
+    }
+    ```
+
+    ```json Full Example
+    {
+      "task": "The agent needs to call the knowledge base tool when asked account-related questions.",
+      "target_model": "gpt-4.1-nano",
+      "prompt": "You are a sales agent talking to {name}",
+      "agent_type": "inbound",
+      "tool_schema": [
+        {
+          "name": "lookupAccount",
+          "description": "Looks up a user's account details.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "account_id": {
+                "type": "string",
+                "description": "Unique ID of the user's account"
+              }
+            },
+            "required": ["account_id"]
+          }
+        }
+      ],
+      "transcript": "User: I want to check my balance.\nAgent: Can you provide your account ID?\nUser: It's A1234.",
+      "test_criteria": "The agent should use the lookupAccount tool when asked about balances.",
+      "user_persona": "Patient and detail-oriented.",
+      "provided_variables": {
+        "name": "Sam",
+        "account_id": "A1234"
+      }
+    }
+    ```
+
+    </CodeGroup>
+
+  </Step>
+
+</Steps>
+
+## 🔄 Polling for Results
+
+<Steps>
+  <Step title="Get Your Task ID">
+    After creating a task, you'll receive a `task_id` in the response.
+  </Step>
+  <Step title="Poll the Results Endpoint">
+    Use the `/get_results/{task_id}` endpoint with your API key to check status.
+  </Step>
+  <Step title="Wait for Completion">
+    Keep polling until you receive a "completed" or "failed" status.
+  </Step>
+</Steps>
+
+<Note>
+⏱️ **Timing**: Tasks usually complete in 1–2 minutes. Keep polling until you receive a result.
+</Note>
+
+## 📋 Summary: All Parameters
+
+<Tabs>
+  <Tab title="Required Parameters">
+    <CardGroup cols={2}>
+      <Card title="task" icon="bullseye">
+        **string** - The prompt engineering task description  
+
+      </Card>
+      <Card title="target_model" icon="tag">
+        **string** - The LLM model to use (OpenAI/Anthropic)  
+      
+      </Card>
+      <Card title="prompt" icon="message">
+        **string** - The base prompt text  
+ 
+      </Card>
+      <Card title="agent_type" icon="users">
+        **string** - Must be "outbound" or "inbound"  
+
+      </Card>
+    </CardGroup>
+  </Tab>
+  
+  <Tab title="Optional Parameters">
+    <CardGroup cols={2}>
+      <Card title="tool_schema" icon="wrench">
+        **array** - List of tool definitions available to the agent  
+      </Card>
+      <Card title="transcript" icon="message">
+        **string** - Sample conversation to simulate  
+      </Card>
+      <Card title="test_criteria" icon="filter">
+        **string** - Criteria for what counts as a "successful" agent behaviour  
+      </Card>
+      <Card title="user_persona" icon="user">
+        **string** - Customer persona to simulate  
+      </Card>
+      <Card title="provided_variables" icon="briefcase">
+        **object** - Dict of variable names and values (auto-generated if missing)  
+      </Card>
+    </CardGroup>
+  </Tab>
+</Tabs>
+
+## 🚀 Next Steps
+
+<CardGroup cols={2}>
+
+<Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+  **Get Started Now**  
+  See hands-on API examples and start building immediately
+</Card>
+
+<Card title="API Reference" icon="book" href="/api-reference">
+  **Detailed Documentation**  
+  Complete reference for all endpoints and schemas
+</Card>
+
+</CardGroup>
+
+---
+
+<Note>
+**Need Help?** Check out our [Quick Start Guide](/quickstart) for step-by-step examples, or dive into the [API Reference](/api-reference) for complete technical details.
+</Note>

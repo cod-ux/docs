@@ -1,4 +1,6 @@
 ---
-title: 'Get Plants'
-openapi: 'GET /plants'
+title: "Get Results"
+openapi: "GET /get_results/{task_id}"
 ---
+
+Retrieve the status and results of a prompt optimization task using the task ID returned from the create_task endpoint. Once the optimization is complete, this endpoint will return the improved prompt and evaluation metrics.

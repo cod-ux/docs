@@ -1,71 +1,101 @@
 ---
-title: Introduction
-description: "Welcome to the home of your new documentation"
+title: "Introduction"
+description: "AI-powered prompt engineering API that improves your AI agents through evals-driven optimization"
 ---
 
 <img
-  className="block dark:hidden"
+  className="block dark:hidden w-[800px] mx-auto border-2 border-black-800 rounded-2xl"
   src="/images/hero-light.png"
-  alt="Hero Light"
+  alt="Doppler API Hero Light"
 />
 <img
-  className="hidden dark:block"
-  src="/images/hero-dark.png"
-  alt="Hero Dark"
+  className="hidden dark:block w-[800px] mx-auto border-2 border-black-800 rounded-2xl"
+  src="/images/hero-light.png"
+  alt="Doppler API Hero Dark"
 />
 
-## Setting up Doppler
+# Welcome to Doppler
 
-The first step to world-class documentation is setting up your editing environments.
+Doppler is an AI prompt engineer you can access via API. Send your prompts for AI agents (optionally with tool schemas) and specify a prompt engineering task to change your agent's behavior. Doppler runs simulations, improves prompts, and reruns simulations until the new prompt achieves your desired task.
+
+This is an **evals-driven prompt improvement API** that acts as your AI prompt engineer.
+
+## Quick Start
+
+Get up and running with Doppler in minutes.
 
 <CardGroup cols={2}>
-  <Card
-    title="Edit Your Docs"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
-  >
-    Get your docs set up locally for easy development
+  <Card title="Sign Up & Get API Key" icon="key" href="https://dopplr.dev">
+    Sign up for an account at dopplr.dev and find your API key in your dashboard
   </Card>
   <Card
-    title="Preview Changes"
-    icon="image"
-    href="https://mintlify.com/docs/development"
+    title="Create Your First Task"
+    icon="play"
+    href="/api-reference/create-task"
   >
-    Preview your changes before you push to make sure they're perfect
+    Submit a prompt engineering task and let Doppler optimize it
   </Card>
 </CardGroup>
 
-## Make it yours
+## How Doppler Works
 
-Update your docs to your brand and add valuable content for the best user conversion.
+<Steps>
+  <Step title="Submit Your Task">
+    Send your current prompt, target model, and desired behavior changes via the
+    `/create_task` endpoint. This returns a task_id immediately.
+  </Step>
+  <Step title="Doppler Optimizes">
+    Our AI runs simulations and iteratively improves your prompt based on your
+    specified criteria
+  </Step>
+  <Step title="Get Results">
+    Retrieve the status of your task using the task_id with the `/get_results`
+    endpoint. Once completed, it will return your optimized prompt and
+    performance metrics.
+  </Step>
+</Steps>
+
+## API Endpoints
+
+Doppler provides two core endpoints to power your prompt engineering workflow.
 
 <CardGroup cols={2}>
-  <Card
-    title="Customize Style"
-    icon="palette"
-    href="https://mintlify.com/docs/settings/global"
-  >
-    Customize your docs to your company's colors and brands
+  <Card title="Create Task" icon="plus" href="/api-reference/create-task">
+    Submit a new prompt optimization task with your requirements
   </Card>
-  <Card
-    title="Reference APIs"
-    icon="code"
-    href="https://mintlify.com/docs/api-playground/openapi"
-  >
-    Automatically generate endpoints from an OpenAPI spec
-  </Card>
-  <Card
-    title="Add Components"
-    icon="screwdriver-wrench"
-    href="https://mintlify.com/docs/content/components/accordions"
-  >
-    Build interactive features and designs to guide your users
-  </Card>
-  <Card
-    title="Get Inspiration"
-    icon="stars"
-    href="https://mintlify.com/customers"
-  >
-    Check out our showcase of our favorite documentation
+  <Card title="Get Results" icon="chart-line" href="/api-reference/get-results">
+    Retrieve optimized prompts and evaluation results
   </Card>
 </CardGroup>
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Evals-Driven Optimization" icon="target">
+    Doppler uses rigorous evaluation frameworks to ensure prompt improvements
+    meet your specific criteria
+  </Card>
+  <Card title="Tool Schema Support" icon="wrench">
+    Include your agent's tool schemas for context-aware prompt optimization
+  </Card>
+  <Card title="Multi-Model Support" icon="brain">
+    Optimize prompts for different target models and use cases
+  </Card>
+  <Card title="Custom Test Criteria" icon="check-circle">
+    Define specific success criteria and user personas for targeted optimization
+  </Card>
+</CardGroup>
+
+## Use Cases
+
+- **Automate Prompt Engineering Tasks**: Eliminate manual prompt engineering bottlenecks that are slowing down your development
+- **Fix Errors in Multi-Turn Conversations**: Iterate on prompts rapidly to fix errors in tool invocations, incorrect behaviour, knowledge gaps, etc...
+- **Resolve Customer Feedback on Agents**: Quickly address and resolve issues reported by customers on your AI agent autonomously
+
+## Next Steps
+
+Ready to start optimizing your prompts? Check out our API reference to begin integrating Doppler into your workflow.
+
+<Card title="View API Reference" icon="code" href="/api-reference">
+  Explore detailed documentation for all Doppler endpoints
+</Card>

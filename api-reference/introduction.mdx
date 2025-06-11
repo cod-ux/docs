@@ -1,33 +1,39 @@
 ---
-title: "Introduction"
-description: "Example section for showcasing API endpoints (Doppler)"
+title: "API Reference"
+description: "Complete reference for Doppler's AI prompt engineering API endpoints"
 ---
-
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
 
 ## Welcome
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+Doppler provides a simple REST API for optimizing your AI agent prompts through evals-driven improvements. The API consists of two main endpoints that allow you to submit optimization tasks and retrieve results.
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
+<Card title="Quick Start Tutorial" icon="play" href="/quickstart">
+  Get started with Doppler in minutes
 </Card>
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API endpoints require authentication using an API key passed in the request headers. You can obtain your API key by signing up at [dopplr.dev](https://dopplr.dev) and accessing it from your dashboard.
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+### API Key Authentication
+
+Include your API key in the request headers:
+
+```bash
+curl -X POST "https://api.dopplr.dev/create_task" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
 ```
+
+## Base URL
+
+All API requests should be made to:
+
+```
+https://api.dopplr.dev
+```
+
+## Endpoints Overview
+
+- **POST /create_task** - Submit a new prompt optimization task
+- **GET /get_results/{task_id}** - Retrieve optimization results for a specific task

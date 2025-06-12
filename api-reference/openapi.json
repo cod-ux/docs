@@ -535,7 +535,27 @@
             },
             "type": "array",
             "title": "Conversation",
-            "description": "Array of the actual conversation/interaction that was tested"
+            "description": "Array of the actual conversation/interaction that was tested. Can contain Message objects and Tool Call objects (OpenAI or Anthropic format).",
+            "example": [
+              {
+                "role": "user",
+                "content": "I need to check my account balance"
+              },
+              {
+                "role": "assistant",
+                "content": "I'll help you check your account balance. Let me look that up for you."
+              },
+              {
+                "type": "function_call",
+                "call_id": "call_123",
+                "name": "lookupAccount",
+                "arguments": "{\"account_id\": \"A1234\"}"
+              },
+              {
+                "role": "assistant",
+                "content": "Your current account balance is $1,250.00. Is there anything else I can help you with?"
+              }
+            ]
           }
         },
         "type": "object",
